@@ -237,10 +237,10 @@ class ImgHardTriggerNode : public rclcpp::Node
                 m_HostTimeStamp = pFrameInfo->nHostTimeStamp;
                 
                 // ch:保存图像到文件 | en:Save the image to a file.
-                std::string filename = save_dir + "/image_" + std::to_string(m_HostTimeStamp) + ".png";
+                std::string filename = save_dir + std::to_string(m_HostTimeStamp) + ".png";
                 cv::imwrite(filename, bgr_img);
 
-                RCLCPP_INFO(pThis->get_logger(), "Image saved as %s", filename.c_str());
+                RCLCPP_INFO(pThis->get_logger(), "%s", filename.c_str());
             }
             else
             {
