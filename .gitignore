@@ -12,5 +12,5 @@ install/
 build/
 
 #
-src/
+src
 !src/*
