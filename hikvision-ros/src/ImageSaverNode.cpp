@@ -4,7 +4,8 @@
 #include "opencv2/opencv.hpp"
 #include "filesystem"
 #include "string"
-#include "MvCameraControl.h" // 海康相机的SDK头文件
+// ch:海康相机的SDK头文件 | en:SDK header file of Hikvision Camera
+#include "MvCameraControl.h"
 
 
 class ImageSaverNode : public rclcpp::Node
