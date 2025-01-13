@@ -10,3 +10,7 @@ install/
 
 #
 build/
+
+#
+src/
+!src/*
