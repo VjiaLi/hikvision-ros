@@ -1,0 +1,12 @@
+# 
+.vscode/
+.idea/
+
+#
+log/
+
+#
+install/
+
+#
+build/
