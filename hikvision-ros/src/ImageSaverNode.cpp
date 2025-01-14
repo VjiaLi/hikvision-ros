@@ -14,9 +14,12 @@ class ImageSaverNode : public rclcpp::Node
         ImageSaverNode()
             : Node("image_saver_node")
         {
+            // ch:指定参数 | en: declare parameter
+            declare_parameter("fps", 100);
+            
             // ch:创建定时器，设置为10Hz | en:Create a timer, set to 10Hz
             timer_ = this->create_wall_timer(
-                std::chrono::milliseconds(100), 
+                std::chrono::milliseconds(this->get_parameter("fps").as_int()), 
                 std::bind(&ImageSaverNode::timer_callback, this));
 
             // ch:初始化相机 | en:Initialize the camera

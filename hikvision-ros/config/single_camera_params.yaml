@@ -1,0 +1,3 @@
+hikvision/camera:
+  ros__parameters:
+    fps: 100
