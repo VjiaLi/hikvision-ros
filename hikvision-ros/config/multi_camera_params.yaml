@@ -1,8 +1,10 @@
 hikvision/camera_1:
   ros__parameters:
-    fps: 100
+    sensor_hostname: ""
+    time_interval: 100
 
 hikvision/camera_2:
   ros__parameters:
-    fps: 100
+    sensor_hostname: ""
+    time_interval: 100
     

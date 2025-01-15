@@ -1,3 +1,6 @@
 hikvision/camera:
   ros__parameters:
-    fps: 100
+    # sensor_hostname[required]: hostname or IP address of the sensor (IP4 or IP6).
+    sensor_hostname: ""
+    # time_interval[required]: specify camera acquisition frequency, default: 10 Hz.
+    time_interval: 10

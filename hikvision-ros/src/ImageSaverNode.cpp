@@ -15,11 +15,12 @@ class ImageSaverNode : public rclcpp::Node
             : Node("image_saver_node")
         {
             // ch:指定参数 | en: declare parameter
-            declare_parameter("fps", 100);
+            declare_parameter("sensor_hostname", std::string("192.168.2.101"));
+            declare_parameter("time_interval", 10);
             
             // ch:创建定时器，设置为10Hz | en:Create a timer, set to 10Hz
             timer_ = this->create_wall_timer(
-                std::chrono::milliseconds(this->get_parameter("fps").as_int()), 
+                std::chrono::milliseconds(this->get_parameter("time_interval").as_int() * 10), 
                 std::bind(&ImageSaverNode::timer_callback, this));
 
             // ch:初始化相机 | en:Initialize the camera
@@ -40,6 +41,9 @@ class ImageSaverNode : public rclcpp::Node
                 return;
             }
 
+            unsigned int nIndex = 0;
+
+            // ch:打印相机设备信息同时根据配置文件中的sensor_hostname选择启动相机 | en:Print the camera device information while starting the camera based on the 'sensor_hostname' selections in the profile.
             if (stDeviceList.nDeviceNum > 0)
             {
                 for (int i = 0; i < stDeviceList.nDeviceNum; i++)
@@ -50,22 +54,16 @@ class ImageSaverNode : public rclcpp::Node
                     {
                         return;
                     } 
-                    PrintDeviceInfo(pDeviceInfo);            
+                    PrintDeviceInfo(pDeviceInfo);   
+                    if(CheckDeviceIp(pDeviceInfo, this->get_parameter("sensor_hostname").as_string()))
+                    {
+                        nIndex = i;
+                    }      
                 }  
             } 
             else
             {
                 printf("Find No Devices!\n");
-                return;
-            }
-
-            printf("Please Intput camera index: ");
-            unsigned int nIndex = 0;
-            scanf("%d", &nIndex);
-
-            if (nIndex >= stDeviceList.nDeviceNum)
-            {
-                printf("Intput error!\n");
                 return;
             }
 
@@ -179,6 +177,33 @@ class ImageSaverNode : public rclcpp::Node
             else
             {
                 RCLCPP_ERROR(this->get_logger(), "Get Image failed! nRet [0x%x]", nRet);
+            }
+        }
+        
+        bool CheckDeviceIp(MV_CC_DEVICE_INFO* pstMVDevInfo, const std::string ip)
+        {
+            if (NULL == pstMVDevInfo)
+            {
+                printf("The Pointer of pstMVDevInfo is NULL!\n");
+                return false;
+            }
+            if (pstMVDevInfo->nTLayerType == MV_GIGE_DEVICE)
+            {
+                // ch:将相机IP格式转换成四字节 | en:Convert the camera IP format to four bytes.
+                int nIp1 = ((pstMVDevInfo->SpecialInfo.stGigEInfo.nCurrentIp & 0xff000000) >> 24);
+                int nIp2 = ((pstMVDevInfo->SpecialInfo.stGigEInfo.nCurrentIp & 0x00ff0000) >> 16);
+                int nIp3 = ((pstMVDevInfo->SpecialInfo.stGigEInfo.nCurrentIp & 0x0000ff00) >> 8);
+                int nIp4 = (pstMVDevInfo->SpecialInfo.stGigEInfo.nCurrentIp & 0x000000ff);
+
+                // ch:拼接IP为字符串 | en:The concatenated IP address is a string.
+                std::string ip_str = std::to_string(nIp1) + "." + std::to_string(nIp2) + "." + std::to_string(nIp3) + "." + std::to_string(nIp4);
+
+                if(ip_str == ip)
+                {
+                    return true;
+                }
+
+                return false;
             }
         }
 
