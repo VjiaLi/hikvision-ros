@@ -1,4 +1,4 @@
-# HK_Cam_ROS2_Driver
+# Hikvision ROS2 Driver
 ROS2 Driver Package for Hikvision Industrial Camera SDK
 
 
@@ -8,7 +8,7 @@ workspace as shown below:
 
 ```bash
 mkdir -p hik_ws/src && cd hik_ws/src
-git clone https://github.com/VjiaLi/HK_Cam_ROS2_Driver.git
+git clone https://github.com/VjiaLi/hikvision-ros.git .
 ```
 
 Next to compile the driver you need to source the ROS environemt into the active termainl:
