@@ -1,6 +1,5 @@
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
-#include "cv_bridge/cv_bridge.hpp"
 #include "opencv2/opencv.hpp"
 #include "filesystem"
 #include "string"
@@ -150,10 +149,6 @@ class ImageSaverNode : public rclcpp::Node
 
                 cv::cvtColor(img, bgr_img, cv::COLOR_RGB2BGR);
 
-                // ch:转换为ROS Image消息 | en:Transform to ROS Image Messages
-                sensor_msgs::msg::Image::SharedPtr image_msg = cv_bridge::CvImage(
-                    std_msgs::msg::Header(), "bgr8", bgr_img).toImageMsg();
-
                 // ch:指定保存图像的子目录 | en:Specifies the subdirectory where the image is saved.
                 std::string save_dir = current_dir + "/saved_images/";
 
@@ -163,10 +158,14 @@ class ImageSaverNode : public rclcpp::Node
                 }
 
                 // ch:获取时间戳 | en:Get the timestamp
-                unsigned long long timestamp = stImageInfo.stFrameInfo.nDevTimeStampHigh * 1000000000LL + stImageInfo.stFrameInfo.nDevTimeStampLow;
+                uint64_t m_DevTimeStamp = 0; //设备产生图像的时间
+                int64_t m_HostTimeStamp = 0; //图像包到达主机的时间
+                m_DevTimeStamp = stImageInfo.stFrameInfo.nDevTimeStampHigh;
+                m_DevTimeStamp = (m_DevTimeStamp << 32) + stImageInfo.stFrameInfo.nDevTimeStampLow;
+                m_HostTimeStamp = stImageInfo.stFrameInfo.nHostTimeStamp;
 
                 // ch:保存图像到文件 | en:Save the image to a file.
-                std::string filename = save_dir + "image_" + std::to_string(timestamp) + ".png";
+                std::string filename = save_dir + "image_" + std::to_string(m_HostTimeStamp) + ".png";
                 cv::imwrite(filename, bgr_img);
 
                 RCLCPP_INFO(this->get_logger(), "Image saved as %s", filename.c_str());
