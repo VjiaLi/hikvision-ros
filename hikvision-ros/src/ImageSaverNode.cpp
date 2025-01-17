@@ -14,7 +14,7 @@ class ImageSaverNode : public rclcpp::Node
             : Node("image_saver_node")
         {
             // ch:指定参数 | en: declare parameter
-            declare_parameter("sensor_hostname", std::string("192.168.2.101"));
+            declare_parameter("sensor_hostname", std::string("192.168.3.101"));
             declare_parameter("time_interval", 10);
             
             // ch:创建定时器，设置为10Hz | en:Create a timer, set to 10Hz
@@ -40,8 +40,6 @@ class ImageSaverNode : public rclcpp::Node
                 return;
             }
 
-            unsigned int nIndex = 0;
-
             // ch:打印相机设备信息同时根据配置文件中的sensor_hostname选择启动相机 | en:Print the camera device information while starting the camera based on the 'sensor_hostname' selections in the profile.
             if (stDeviceList.nDeviceNum > 0)
             {
@@ -53,7 +51,9 @@ class ImageSaverNode : public rclcpp::Node
                     {
                         return;
                     } 
+
                     PrintDeviceInfo(pDeviceInfo);   
+
                     if(CheckDeviceIp(pDeviceInfo, this->get_parameter("sensor_hostname").as_string()))
                     {
                         nIndex = i;
@@ -150,7 +150,7 @@ class ImageSaverNode : public rclcpp::Node
                 cv::cvtColor(img, bgr_img, cv::COLOR_RGB2BGR);
 
                 // ch:指定保存图像的子目录 | en:Specifies the subdirectory where the image is saved.
-                std::string save_dir = current_dir + "/saved_images/";
+                std::string save_dir = current_dir + "/images/camera_" + std::to_string(nIndex);
 
                 // ch:检查并创建目录 | en:Check and create a catalogue.
                 if (!std::filesystem::exists(save_dir)) {
@@ -165,7 +165,7 @@ class ImageSaverNode : public rclcpp::Node
                 m_HostTimeStamp = stImageInfo.stFrameInfo.nHostTimeStamp;
 
                 // ch:保存图像到文件 | en:Save the image to a file.
-                std::string filename = save_dir + "image_" + std::to_string(m_HostTimeStamp) + ".png";
+                std::string filename = save_dir + "/image_" + std::to_string(m_HostTimeStamp) + ".png";
                 cv::imwrite(filename, bgr_img);
 
                 RCLCPP_INFO(this->get_logger(), "Image saved as %s", filename.c_str());
@@ -263,8 +263,13 @@ class ImageSaverNode : public rclcpp::Node
         }
 
         rclcpp::TimerBase::SharedPtr timer_;
+
         // ch:获取当前工作目录 | en:Get current workfolder
         std::string current_dir = std::filesystem::current_path().string(); 
+        
+        // ch:选择的相机序号 | en:The camera serial number selected
+        unsigned int nIndex = 0;
+
         void *handle = nullptr;
 };
 
