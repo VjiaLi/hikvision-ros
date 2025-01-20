@@ -18,14 +18,14 @@ source /opt/ros/<ros-distro>/setup.bash # replace ros-distro with 'rolling', 'hu
 
 Finally, invoke `colcon build` command from within the catkin workspace as shown below:
 ```bash
-cd hik_ws
+cd ..
 colcon build
 ```
 
 Once the build succeeds, you must source the _install_ folder of your ros2 workspace to add launch
 commands to your environment:
 ```bash
-source hik_ws/install/setup.bash
+source ./install/setup.bash
 ```
 
 ## Usage
