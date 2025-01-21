@@ -38,6 +38,7 @@ link_directories(/opt/MVS/lib/64)
 SET(CMAKE_INSTALL_RPATH /opt/MVS/lib/64)
 
 add_executable(ImageSaverNode ./src/ImageSaverNode.cpp)
+add_executable(ImgHardTriggerNode ./src/ImgHardTriggerNode.cpp)
 
 # Link Library
 ament_target_dependencies(ImageSaverNode
@@ -46,11 +47,22 @@ ament_target_dependencies(ImageSaverNode
   sensor_msgs
 )
 
+ament_target_dependencies(ImgHardTriggerNode
+  rclcpp
+  std_msgs
+  sensor_msgs
+)
+
 target_link_libraries(ImageSaverNode MvCameraControl ${OpenCV_LIBS})
+target_link_libraries(ImgHardTriggerNode MvCameraControl ${OpenCV_LIBS})
 
 # ==== Install ====
 
 install(TARGETS ImageSaverNode
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(TARGETS ImgHardTriggerNode
   DESTINATION lib/${PROJECT_NAME}
 )
 
