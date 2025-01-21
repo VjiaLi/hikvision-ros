@@ -94,9 +94,22 @@ class ImgHardTriggerNode : public rclcpp::Node
                 }
             }
 
+            printf("Start export the camera properties to the file\n");
+            printf("Wait......\n");
+            // ch:将相机属性导出到文件中 | en:Export the camera properties to the file
+
+            nRet = MV_CC_FeatureSave(handle, (current_dir + "/src/hikvision-ros/config/FeatureFile.ini").c_str());
+            if (MV_OK != nRet)
+            {
+                printf("Save Feature fail! nRet [0x%x]\n", nRet);
+                return;
+            }
+            printf("Finish export the camera properties to the file\n\n");
+
             printf("Start import the camera properties from the file\n");
             printf("Wait......\n");
             // ch:从文件中导入相机属性 | en:Import the camera properties from the file
+
             nRet = MV_CC_FeatureLoad(handle, (current_dir + "/src/hikvision-ros/config/FeatureFile.ini").c_str());
             if (MV_OK != nRet)
             {
@@ -107,7 +120,7 @@ class ImgHardTriggerNode : public rclcpp::Node
 
             do
             {
-                nRet = MV_CC_RegisterImageCallBackEx(handle, ImageCallBackEx, handle);
+                nRet = MV_CC_RegisterImageCallBackEx(handle, &ImgHardTriggerNode::ImageCallBackEx, this);
                 if (MV_OK != nRet)
                 {
                     printf("MV_CC_RegisterImageCallBackEx fail! nRet [%x]\n", nRet);
@@ -168,21 +181,15 @@ class ImgHardTriggerNode : public rclcpp::Node
         static void __stdcall ImageCallBackEx(unsigned char * pData, MV_FRAME_OUT_INFO_EX* pFrameInfo, void* pUser)
         {
             ImgHardTriggerNode* pThis = static_cast<ImgHardTriggerNode*>(pUser);  // 恢复类实例
+            
             if (pFrameInfo)
             {
-                printf("GetOneFrame, Width[%d], Height[%d], nFrameNum[%d]\n", 
-                    pFrameInfo->nExtendWidth, pFrameInfo->nExtendHeight, pFrameInfo->nFrameNum);
-            }
-            /*
-             MV_FRAME_OUT stImageInfo = {0};
-            int nRet = MV_CC_GetImageBuffer(pThis->handle, &stImageInfo, 2000); // 2秒超时
-            if (nRet == MV_OK)
-            {
+
                 // ch:处理图像 | en:Process Image 
-                cv::Mat img(stImageInfo.stFrameInfo.nExtendHeight, stImageInfo.stFrameInfo.nExtendWidth, CV_8UC3, stImageInfo.pBufAddr);
+                cv::Mat img(pFrameInfo->nExtendHeight, pFrameInfo->nExtendWidth, CV_8UC3, pData);
 
                 cv::Mat bgr_img;
-
+                
                 cv::cvtColor(img, bgr_img, cv::COLOR_RGB2BGR);
 
                 // ch:指定保存图像的子目录 | en:Specifies the subdirectory where the image is saved.
@@ -196,24 +203,22 @@ class ImgHardTriggerNode : public rclcpp::Node
                 // ch:获取时间戳 | en:Get the timestamp
                 uint64_t m_DevTimeStamp = 0; //设备产生图像的时间
                 int64_t m_HostTimeStamp = 0; //图像包到达主机的时间
-                m_DevTimeStamp = stImageInfo.stFrameInfo.nDevTimeStampHigh;
-                m_DevTimeStamp = (m_DevTimeStamp << 32) + stImageInfo.stFrameInfo.nDevTimeStampLow;
-                m_HostTimeStamp = stImageInfo.stFrameInfo.nHostTimeStamp;
+                m_DevTimeStamp = pFrameInfo->nDevTimeStampHigh;
+                m_DevTimeStamp = (m_DevTimeStamp << 32) + pFrameInfo->nDevTimeStampLow;
+                m_DevTimeStamp = m_DevTimeStamp / 100;
+                m_HostTimeStamp = pFrameInfo->nHostTimeStamp;
 
                 // ch:保存图像到文件 | en:Save the image to a file.
                 std::string filename = save_dir + "/image_" + std::to_string(m_HostTimeStamp) + ".png";
                 cv::imwrite(filename, bgr_img);
 
                 RCLCPP_INFO(pThis->get_logger(), "Image saved as %s", filename.c_str());
-
-                // ch:释放图像缓冲区 | en:Free up the image buffer.
-                MV_CC_FreeImageBuffer(pThis->handle, &stImageInfo);
             }
             else
             {
-                RCLCPP_ERROR(pThis->get_logger(), "Get Image failed! nRet [0x%x]", nRet);
+                RCLCPP_ERROR(pThis->get_logger(), "Get Image failed!");
             }
-            */
+            
         }
 
     private:

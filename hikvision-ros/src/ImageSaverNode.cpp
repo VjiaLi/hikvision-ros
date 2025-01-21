@@ -100,6 +100,18 @@ class ImageSaverNode : public rclcpp::Node
                 }
             }
 
+            printf("Start export the camera properties to the file\n");
+            printf("Wait......\n");
+            // ch:将相机属性导出到文件中 | en:Export the camera properties to the file
+
+            nRet = MV_CC_FeatureSave(handle, (current_dir + "/src/hikvision-ros/config/FeatureFile.ini").c_str());
+            if (MV_OK != nRet)
+            {
+                printf("Save Feature fail! nRet [0x%x]\n", nRet);
+                return;
+            }
+            printf("Finish export the camera properties to the file\n\n");
+
             printf("Start import the camera properties from the file\n");
             printf("Wait......\n");
             // ch:从文件中导入相机属性 | en:Import the camera properties from the file
