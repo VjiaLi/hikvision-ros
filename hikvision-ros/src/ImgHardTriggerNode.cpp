@@ -118,53 +118,50 @@ class ImgHardTriggerNode : public rclcpp::Node
             }
             printf("Finish import the camera properties from the file\n");
 
-            do
+            nRet = MV_CC_RegisterImageCallBackEx(handle, &ImgHardTriggerNode::ImageCallBackEx, this);
+            if (MV_OK != nRet)
             {
-                nRet = MV_CC_RegisterImageCallBackEx(handle, &ImgHardTriggerNode::ImageCallBackEx, this);
-                if (MV_OK != nRet)
-                {
-                    printf("MV_CC_RegisterImageCallBackEx fail! nRet [%x]\n", nRet);
-                    break; 
-                }
+                printf("MV_CC_RegisterImageCallBackEx fail! nRet [%x]\n", nRet);
+                return; 
+            }
 
-                // ch:开始取流 | en:start grab image
-                nRet = MV_CC_StartGrabbing(handle);
-                if (nRet != MV_OK)
-                {
-                    RCLCPP_ERROR(this->get_logger(), "Start Grabbing failed! nRet [0x%x]", nRet);
-                    return;
-                }
-                RCLCPP_INFO(this->get_logger(), "Camera initialized and grabbing started.");
+            // ch:开始取流 | en:start grab image
+            nRet = MV_CC_StartGrabbing(handle);
+            if (nRet != MV_OK)
+            {
+                RCLCPP_ERROR(this->get_logger(), "Start Grabbing failed! nRet [0x%x]", nRet);
+                return;
+            }
+            RCLCPP_INFO(this->get_logger(), "Camera initialized and grabbing started.");
+            
+        }
 
-                PressEnterToExit();
-                // 停止取流
-                // end grab image
-                nRet = MV_CC_StopGrabbing(handle);
-                if (MV_OK != nRet)
-                {
-                    printf("MV_CC_StopGrabbing fail! nRet [%x]\n", nRet);
-                    break;
-                }
+        ~ImgHardTriggerNode()
+        {
+            // ch:停止取流 | en:end grab image
+            int nRet = MV_CC_StopGrabbing(handle);
+            if (MV_OK != nRet)
+            {
+                printf("MV_CC_StopGrabbing fail! nRet [%x]\n", nRet);
+                return;
+            }
 
-                // 关闭设备
-                // close device
-                nRet = MV_CC_CloseDevice(handle);
-                if (MV_OK != nRet)
-                {
-                    printf("MV_CC_CloseDevice fail! nRet [%x]\n", nRet);
-                    break;
-                }
+            // ch:关闭设备 | en:close device
+            nRet = MV_CC_CloseDevice(handle);
+            if (MV_OK != nRet)
+            {
+                printf("MV_CC_CloseDevice fail! nRet [%x]\n", nRet);
+                return;
+            }
 
-                // 销毁句柄
-                // destroy handle
-                nRet = MV_CC_DestroyHandle(handle);
-                if (MV_OK != nRet)
-                {
-                    printf("MV_CC_DestroyHandle fail! nRet [%x]\n", nRet);
-                    break;
-                }
-                handle = NULL;
-            } while (0);
+            // ch:销毁句柄 | en:destroy handle
+            nRet = MV_CC_DestroyHandle(handle);
+            if (MV_OK != nRet)
+            {
+                printf("MV_CC_DestroyHandle fail! nRet [%x]\n", nRet);
+                return;
+            }
+            handle = NULL;
 
             if (handle != NULL)
             {
@@ -306,8 +303,7 @@ class ImgHardTriggerNode : public rclcpp::Node
             return true;
         }
 
-        // 等待用户输入enter键来结束取流或结束程序
-        // wait for user to input enter to stop grabbing or end the sample program
+        // ch:等待用户输入enter键来结束取流或结束程序 | en:wait for user to input enter to stop grabbing or end the sample program
         void PressEnterToExit(void)
         {
             int c;
