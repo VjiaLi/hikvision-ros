@@ -1,10 +1,10 @@
 hikvision/camera_1:
   ros__parameters:
     sensor_hostname: ""
-    time_interval: 100
+    time_interval: 10
 
 hikvision/camera_2:
   ros__parameters:
     sensor_hostname: ""
-    time_interval: 100
+    time_interval: 10
     

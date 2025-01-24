@@ -30,16 +30,34 @@ source ./install/setup.bash
 
 ## Usage
 
-### Only one camera
+### No Trigger
+
+#### Only one camera
 To connect to only a live camera you use the following launch file
 ```bash
 ros2 launch hikvision-ros SingleCamera.launch.py    \
     params_file:=<path to params yaml file>
 ```
 
-### Multiple camera
+#### Multiple camera
 To connect to multiple live camera you use the following launch file
 ```bash
 ros2 launch hikvision-ros MultiCamera.launch.py    \
+    params_file:=<path to params yaml file>
+```
+
+### Hard Trigger(Line 0)
+
+#### Only one camera
+To connect to only a live camera you use the following launch file
+```bash
+ros2 launch hikvision-ros SingleCamera.HardTrigger.launch.py    \
+    params_file:=<path to params yaml file>
+```
+
+#### Multiple camera
+To connect to multiple live camera you use the following launch file
+```bash
+ros2 launch hikvision-ros MultiCamera.HardTrigger.launch.py    \
     params_file:=<path to params yaml file>
 ```
