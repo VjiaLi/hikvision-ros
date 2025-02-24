@@ -15,7 +15,8 @@ class ImgHardTriggerNode : public rclcpp::Node
         {
             // ch:指定参数 | en: declare parameter
             declare_parameter("sensor_hostname", std::string("192.168.3.101"));
-            
+            cur_ip = this->get_parameter("sensor_hostname").as_string();
+
             // ch:初始化相机 | en:Initialize the camera
             int nRet = MV_CC_Initialize();
             if (nRet != MV_OK)
@@ -94,30 +95,6 @@ class ImgHardTriggerNode : public rclcpp::Node
                 }
             }
 
-            printf("Start export the camera properties to the file\n");
-            printf("Wait......\n");
-            // ch:将相机属性导出到文件中 | en:Export the camera properties to the file
-
-            nRet = MV_CC_FeatureSave(handle, (current_dir + "/src/hikvision-ros/config/FeatureFile.ini").c_str());
-            if (MV_OK != nRet)
-            {
-                printf("Save Feature fail! nRet [0x%x]\n", nRet);
-                return;
-            }
-            printf("Finish export the camera properties to the file\n\n");
-
-            printf("Start import the camera properties from the file\n");
-            printf("Wait......\n");
-            // ch:从文件中导入相机属性 | en:Import the camera properties from the file
-
-            nRet = MV_CC_FeatureLoad(handle, (current_dir + "/src/hikvision-ros/config/FeatureFile.ini").c_str());
-            if (MV_OK != nRet)
-            {
-                printf("Load Feature fail! nRet [0x%x]\n", nRet);
-                return;
-            }
-            printf("Finish import the camera properties from the file\n");
-
             nRet = MV_CC_RegisterImageCallBackEx(handle, &ImgHardTriggerNode::ImageCallBackEx, this);
             if (MV_OK != nRet)
             {
@@ -190,7 +167,7 @@ class ImgHardTriggerNode : public rclcpp::Node
                 cv::cvtColor(img, bgr_img, cv::COLOR_RGB2BGR);
 
                 // ch:指定保存图像的子目录 | en:Specifies the subdirectory where the image is saved.
-                std::string save_dir = pThis->current_dir + "/images/camera_" + std::to_string(pThis->nIndex);
+                std::string save_dir = pThis->current_dir + "/images/camera_" + pThis->cur_ip;
 
                 // ch:检查并创建目录 | en:Check and create a catalogue.
                 if (!std::filesystem::exists(save_dir)) {
@@ -317,6 +294,9 @@ class ImgHardTriggerNode : public rclcpp::Node
         
         // ch:选择的相机序号 | en:The camera serial number selected
         unsigned int nIndex = 0;
+
+        // ch:当前选择的相机IP | en:current camera ip 
+        std::string cur_ip;
 
         void *handle = nullptr;
 };

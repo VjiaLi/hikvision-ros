@@ -39,9 +39,19 @@ def generate_launch_description():
         output='screen',
     )
 
+    camera_3 = Node(
+        package='hikvision-ros',
+        executable='ImgHardTriggerNode',
+        name='camera_3',
+        namespace=hikvision_ns,
+        parameters=[params_file],
+        output='screen',
+    )
+
     return LaunchDescription([
         params_file_arg,
         hikvision_ns_arg,
         camera_1,
-        camera_2
+        camera_2,
+        camera_3
     ])

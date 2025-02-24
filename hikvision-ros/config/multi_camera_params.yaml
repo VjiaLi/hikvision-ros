@@ -1,10 +1,14 @@
 hikvision/camera_1:
   ros__parameters:
-    sensor_hostname: ""
+    sensor_hostname: "192.168.2.101"
     time_interval: 10
 
 hikvision/camera_2:
   ros__parameters:
-    sensor_hostname: ""
+    sensor_hostname: "192.168.3.101"
     time_interval: 10
     
+hikvision/camera_3:
+  ros__parameters:
+    sensor_hostname: "192.168.4.101"
+    time_interval: 10
