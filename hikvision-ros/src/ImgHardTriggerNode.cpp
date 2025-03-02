@@ -95,6 +95,48 @@ class ImgHardTriggerNode : public rclcpp::Node
                 }
             }
 
+            // 设置触发模式为on
+            // set trigger mode as on
+            nRet = MV_CC_SetEnumValue(handle, "TriggerMode", MV_TRIGGER_MODE_ON);
+            if (MV_OK != nRet)
+            {
+                printf("MV_CC_SetTriggerMode fail! nRet [%x]\n", nRet);
+                return;
+            }
+
+            // 设置图像格式为RGB8
+            // set PixelFormat as RGB8
+            nRet = MV_CC_SetEnumValue(handle, "PixelFormat", 0x02180014);
+            if (MV_OK != nRet)
+            {
+                printf("MV_CC_SetPixelFormat fail! nRet [%x]\n", nRet);
+                return;
+            }
+
+            // 设置触发极性为上升沿
+            nRet = MV_CC_SetEnumValue(handle, "TriggerActivation", 0);
+            if (MV_OK != nRet)
+            {
+                printf("MV_CC_SetTriggerActivation fail! nRet [%x]\n", nRet);
+                return;
+            }
+
+            // 设置触发源为线路0
+            nRet = MV_CC_SetEnumValue(handle, "TriggerSource", 0);
+            if (MV_OK != nRet)
+            {
+                printf("MV_CC_SetTriggerSource fail! nRet [%x]\n", nRet);
+                return;
+            }
+            
+            // 设置PTP为True
+            nRet = MV_CC_SetBoolValue(handle, "GevIEEE1588", 1);
+            if (MV_OK != nRet)
+            {
+                printf("MV_CC_SetPTP fail! nRet [%x]\n", nRet);
+                return;
+            }
+
             nRet = MV_CC_RegisterImageCallBackEx(handle, &ImgHardTriggerNode::ImageCallBackEx, this);
             if (MV_OK != nRet)
             {
