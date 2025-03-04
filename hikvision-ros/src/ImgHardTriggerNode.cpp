@@ -137,6 +137,22 @@ class ImgHardTriggerNode : public rclcpp::Node
                 return;
             }
 
+            // 设置自动曝光为连续
+            nRet = MV_CC_SetEnumValue(handle, "ExposureAuto", 2);
+            if (MV_OK != nRet)
+            {
+                printf("MV_CC_SetExposureAuto fail! nRet [%x]\n", nRet);
+                return;
+            }
+
+            // 设置自动增益为连续
+            nRet = MV_CC_SetEnumValue(handle, "GainAuto", 2);
+            if (MV_OK != nRet)
+            {
+                printf("MV_CC_SetGainAuto fail! nRet [%x]\n", nRet);
+                return;
+            }
+
             nRet = MV_CC_RegisterImageCallBackEx(handle, &ImgHardTriggerNode::ImageCallBackEx, this);
             if (MV_OK != nRet)
             {
