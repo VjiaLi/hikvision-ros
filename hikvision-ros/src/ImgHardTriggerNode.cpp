@@ -104,9 +104,9 @@ class ImgHardTriggerNode : public rclcpp::Node
                 return;
             }
 
-            // 设置图像格式为RGB8
-            // set PixelFormat as RGB8
-            nRet = MV_CC_SetEnumValue(handle, "PixelFormat", 0x02180014);
+            // 设置图像格式为BGR8
+            // set PixelFormat as BGR8
+            nRet = MV_CC_SetEnumValue(handle, "PixelFormat", 0x02180015);
             if (MV_OK != nRet)
             {
                 printf("MV_CC_SetPixelFormat fail! nRet [%x]\n", nRet);
@@ -218,11 +218,7 @@ class ImgHardTriggerNode : public rclcpp::Node
             {
 
                 // ch:处理图像 | en:Process Image 
-                cv::Mat img(pFrameInfo->nExtendHeight, pFrameInfo->nExtendWidth, CV_8UC3, pData);
-
-                cv::Mat bgr_img;
-                
-                cv::cvtColor(img, bgr_img, cv::COLOR_RGB2BGR);
+                cv::Mat bgr_img(pFrameInfo->nExtendHeight, pFrameInfo->nExtendWidth, CV_8UC3, pData);
 
                 // ch:指定保存图像的子目录 | en:Specifies the subdirectory where the image is saved.
                 std::string save_dir = pThis->current_dir + "/images/camera_" + pThis->cur_ip;
@@ -239,7 +235,7 @@ class ImgHardTriggerNode : public rclcpp::Node
                 m_DevTimeStamp = (m_DevTimeStamp << 32) + pFrameInfo->nDevTimeStampLow;
                 m_DevTimeStamp = m_DevTimeStamp / 100;
                 m_HostTimeStamp = pFrameInfo->nHostTimeStamp;
-
+                
                 // ch:保存图像到文件 | en:Save the image to a file.
                 std::string filename = save_dir + "/image_" + std::to_string(m_HostTimeStamp) + ".png";
                 cv::imwrite(filename, bgr_img);
