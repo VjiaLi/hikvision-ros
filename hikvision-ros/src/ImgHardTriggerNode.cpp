@@ -1,5 +1,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/image.hpp"
+#include "image_transport/image_transport.hpp"
+#include "cv_bridge/cv_bridge.h"
 #include "opencv2/opencv.hpp"
 #include "filesystem"
 #include "string"
@@ -13,9 +15,14 @@ class ImgHardTriggerNode : public rclcpp::Node
         ImgHardTriggerNode()
             : Node("img_trigger_node")
         {
+            // ch:选择的相机序号 | en:The camera serial number selected
+            unsigned int nIndex = 0;
+            std::string topic = "camera/c";
+
             // ch:指定参数 | en: declare parameter
             declare_parameter("sensor_hostname", std::string("192.168.3.101"));
             cur_ip = this->get_parameter("sensor_hostname").as_string();
+            topic = topic + cur_ip.substr(8, 1);
 
             // ch:初始化相机 | en:Initialize the camera
             int nRet = MV_CC_Initialize();
@@ -153,6 +160,9 @@ class ImgHardTriggerNode : public rclcpp::Node
                 return;
             }
 
+            //创建Image话题发布者
+            publisher_ = this->create_publisher<sensor_msgs::msg::Image>(topic, 10);
+
             nRet = MV_CC_RegisterImageCallBackEx(handle, &ImgHardTriggerNode::ImageCallBackEx, this);
             if (MV_OK != nRet)
             {
@@ -167,7 +177,7 @@ class ImgHardTriggerNode : public rclcpp::Node
                 RCLCPP_ERROR(this->get_logger(), "Start Grabbing failed! nRet [0x%x]", nRet);
                 return;
             }
-            RCLCPP_INFO(this->get_logger(), "Camera initialized and grabbing started.");
+            RCLCPP_INFO(this->get_logger(), "Camerainitialized and grabbing started.");
             
         }
 
@@ -237,8 +247,14 @@ class ImgHardTriggerNode : public rclcpp::Node
                 m_HostTimeStamp = pFrameInfo->nHostTimeStamp;
                 
                 // ch:保存图像到文件 | en:Save the image to a file.
-                std::string filename = save_dir + std::to_string(m_HostTimeStamp) + ".png";
+                std::string filename = save_dir + "/" + std::to_string(m_HostTimeStamp) + ".png";
                 cv::imwrite(filename, bgr_img);
+
+                // 转换OpenCV图像为ROS2 sensor_msgs::msg::Image 并发布
+                auto msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", bgr_img).toImageMsg();
+                msg->header.stamp = pThis->now();
+                msg->header.frame_id = "camera_frame";
+                pThis->publisher_->publish(*msg);                
 
                 RCLCPP_INFO(pThis->get_logger(), "%s", filename.c_str());
             }
@@ -345,12 +361,12 @@ class ImgHardTriggerNode : public rclcpp::Node
 
         // ch:获取当前工作目录 | en:Get current workfolder
         std::string current_dir = std::filesystem::current_path().string(); 
-        
-        // ch:选择的相机序号 | en:The camera serial number selected
-        unsigned int nIndex = 0;
 
         // ch:当前选择的相机IP | en:current camera ip 
         std::string cur_ip;
+
+        //定义图像发布器
+        rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisher_;
 
         void *handle = nullptr;
 };

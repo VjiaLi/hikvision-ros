@@ -27,6 +27,7 @@ def generate_launch_description():
         name='camera_1',
         namespace=hikvision_ns,
         parameters=[params_file],
+        remappings=[("camera/image_raw", "camera_1/image_raw")],
         output='screen',
     )
 
@@ -36,6 +37,7 @@ def generate_launch_description():
         name='camera_2',
         namespace=hikvision_ns,
         parameters=[params_file],
+        remappings=[("camera/image_raw", "camera_2/image_raw")],
         output='screen',
     )
 
@@ -45,6 +47,7 @@ def generate_launch_description():
         name='camera_3',
         namespace=hikvision_ns,
         parameters=[params_file],
+        remappings=[("camera/image_raw", "camera_3/image_raw")],
         output='screen',
     )
 
