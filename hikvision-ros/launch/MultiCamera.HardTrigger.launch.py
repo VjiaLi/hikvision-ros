@@ -16,7 +16,13 @@ def generate_launch_description():
                                             default_value=str(
                                                 default_params_file),
                                             description='name or path to the parameters file to use.')
-    
+
+    default_rviz_config = Path(hikvision_ros_pkg_dir) / 'config' / 'default.rviz'
+
+    rviz_config = LaunchConfiguration('rviz_config')
+    rviz_config_arg = DeclareLaunchArgument(
+        'rviz_config', default_value=str(default_rviz_config))
+
     hikvision_ns = LaunchConfiguration('hikvision_ns')
     hikvision_ns_arg = DeclareLaunchArgument(
         'hikvision_ns', default_value='hikvision')
@@ -27,7 +33,6 @@ def generate_launch_description():
         name='camera_1',
         namespace=hikvision_ns,
         parameters=[params_file],
-        remappings=[("camera/image_raw", "camera_1/image_raw")],
         output='screen',
     )
 
@@ -37,7 +42,6 @@ def generate_launch_description():
         name='camera_2',
         namespace=hikvision_ns,
         parameters=[params_file],
-        remappings=[("camera/image_raw", "camera_2/image_raw")],
         output='screen',
     )
 
@@ -47,14 +51,23 @@ def generate_launch_description():
         name='camera_3',
         namespace=hikvision_ns,
         parameters=[params_file],
-        remappings=[("camera/image_raw", "camera_3/image_raw")],
         output='screen',
+    )
+
+    rviz_node = Node(
+        package='rviz2',
+        namespace=hikvision_ns,
+        executable='rviz2',
+        name='rviz2',
+        arguments=['-d', rviz_config]
     )
 
     return LaunchDescription([
         params_file_arg,
         hikvision_ns_arg,
+        rviz_config_arg,
         camera_1,
         camera_2,
-        camera_3
+        camera_3,
+        rviz_node
     ])
